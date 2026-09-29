@@ -1,119 +1,13 @@
-import csv
-import os
-from datetime import datetime
+from storage import load_expenses, save_expenses, load_budget, save_budget
 from categories import CATEGORIES
 from validation import (get_valid_amount, get_valid_category,
                         get_valid_description, get_valid_date,
                         get_valid_month)
-BASE_FOLDER = os.path.dirname(os.path.abspath(__file__))
-BUDGET_FILE = os.path.join(BASE_FOLDER, "budget.txt")
+expenses = []
 settings = {"budget": 0.0}
-FILE_NAME = os.path.join(BASE_FOLDER, "expenses.csv")
 
 expenses = []
 
-def load_expenses():
-    skipped = 0
-    try:
-        with open(FILE_NAME, "r", newline="") as file:
-            reader = csv.reader(file)
-            next(reader, None)  # skip header
-            for parts in reader:
-                if len(parts) != 4:
-                    skipped += 1
-                    continue
-                try:
-                    amount = float(parts[0])
-                    datetime.strptime(parts[3], "%d-%m-%Y")
-                except ValueError:
-                    skipped += 1
-                    continue
-                expenses.append({
-                    "amount": amount,
-                    "category": parts[1],
-                    "description": parts[2],
-                    "date": parts[3]
-                })
-    except FileNotFoundError:
-        print("No existing expenses file found. Starting fresh.")
-        return
-
-    if skipped > 0:
-        print(f"Warning: {skipped} invalid row(s) in the file were skipped.")
-
-
-def save_expenses():
-    with open("expenses.csv", "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(["Amount", "Category", "Description", "Date"])
-        for exp in expenses:
-            writer.writerow([exp["amount"], exp["category"], exp["description"], exp["date"]])
-    import os
-    print("Saved to:", os.path.abspath("expenses.csv"))
-    print("Expenses saved successfully!")
-
-def load_budget():
-    try:
-        with open(BUDGET_FILE, "r") as file:
-            settings["budget"] = float(file.read().strip())
-    except (FileNotFoundError, ValueError):
-        settings["budget"] = 0.0
-
-def save_budget():
-    with open(BUDGET_FILE, "w") as file:
-        file.write(str(settings["budget"]))
-
-
-def get_valid_date():
-    while True:
-        date_text = input("Enter date (DD-MM-YYYY): ").strip()
-        try:
-            date_obj = datetime.strptime(date_text, "%d-%m-%Y")
-            return date_obj.strftime("%d-%m-%Y")
-        except ValueError:
-            print("Invalid date. Use DD-MM-YYYY, for example 05-03-2026.")
-
-def get_valid_amount():
-    while True:
-        try:
-            amount = float(input("Enter amount: "))
-            if amount <= 0:
-                print("Amount must be greater than 0.")
-            else:
-                return amount
-        except ValueError:
-            print("Please enter a valid number.")
-
-def get_valid_category():
-    print("\nCategories:")
-    for i in range(len(CATEGORIES)):
-        print(f"{i + 1}. {CATEGORIES[i]}")
-    while True:
-        try:
-            cat_choice = int(input(f"Enter category choice (1-{len(CATEGORIES)}): "))
-            if 1 <= cat_choice <= len(CATEGORIES):
-                return CATEGORIES[cat_choice - 1]
-            else:
-                print(f"Please choose a number from 1 to {len(CATEGORIES)}.")
-        except ValueError:
-            print("Please enter a valid number.")
-
-def get_valid_description():
-    while True:
-        description = input("Enter description: ").strip()
-        if description == "":
-            print("Description cannot be empty.")
-        else:
-            return description
-
-def get_valid_date():
-    while True:
-        date_text = input("Enter date (DD-MM-YYYY): ").strip()
-        try:
-            date_obj = datetime.strptime(date_text, "%d-%m-%Y")
-            return date_obj.strftime("%d-%m-%Y")
-        except ValueError:
-            print("Invalid date. Use DD-MM-YYYY, for example 05-03-2026.")
 
 def add_expense():
     amount = get_valid_amount()
@@ -195,14 +89,7 @@ def category_summary():
                 cat_total += exp["amount"]
         print(f"{cat}: Rs.{cat_total}")
 
-def get_valid_month():
-    while True:
-        month_text = input("Enter month (MM-YYYY): ").strip()
-        try:
-            month_obj = datetime.strptime(month_text, "%m-%Y")
-            return month_obj.strftime("%m-%Y")
-        except ValueError:
-            print("Invalid month. Use MM-YYYY, for example 09-2026.")
+
 
 def monthly_summary():
     month = get_valid_month()
@@ -317,7 +204,8 @@ def edit_expense():
     print("Expense updated!")
 
 def main():
-    load_expenses()
+    load_expenses(expenses)
+    settings["budget"] = load_budget()
     while True:
         print("\n=== EXPENSE TRACKER ===")
         print("1. Add Expense")
@@ -357,8 +245,8 @@ def main():
         elif choice == "11":
             search_expenses()
         elif choice == "12":
-            save_expenses()
-            save_budget()
+            save_expenses(expenses)
+            save_budget(settings["budget"])
             print("Bye!")
             break
         else:
