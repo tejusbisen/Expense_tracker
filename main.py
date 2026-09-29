@@ -1,12 +1,15 @@
 import csv
 import os
 from datetime import datetime
+from categories import CATEGORIES
+from validation import (get_valid_amount, get_valid_category,
+                        get_valid_description, get_valid_date,
+                        get_valid_month)
 BASE_FOLDER = os.path.dirname(os.path.abspath(__file__))
 BUDGET_FILE = os.path.join(BASE_FOLDER, "budget.txt")
 settings = {"budget": 0.0}
 FILE_NAME = os.path.join(BASE_FOLDER, "expenses.csv")
 
-CATEGORIES = ["Food", "Transport", "Education", "Shopping", "Entertainment", "Other"]
 expenses = []
 
 def load_expenses():
