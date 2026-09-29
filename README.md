@@ -72,9 +72,12 @@ Note: data is written to disk only when you choose option 12.
 
 Both files are created in the same folder as the program.
 
-## Project structure
+## Testing
 
-- `main.py` - menu and program flow
-- `categories.py` - list of expense categories
-- `validation.py` - input validation helpers
-- `expenses.csv`, `budget.txt` - saved data
+Run the automated tests from the project folder:
+
+    python tests.py
+
+The tests cover storage (save/load, commas in text, damaged rows, damaged budget file), input validation (amount, category, description, date, month) and the add, edit and delete functions. They use temporary test files, so your real data is never changed. All 17 tests should print PASS.
+
+The report functions (total, category summary, highest expense, monthly summary, budget status) print their output, so they are checked manually with the testing checklist in the project report.
