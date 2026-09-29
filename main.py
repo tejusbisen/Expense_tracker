@@ -5,52 +5,14 @@ from validation import (get_valid_amount, get_valid_category,
                         get_valid_month)
 from expense_manager import (add_expense, view_expenses, search_expenses,
                              delete_expense, edit_expense)
+from analysis import (calculate_total, category_summary,
+                      highest_expense, monthly_summary)
 expenses = []
 settings = {"budget": 0.0}
 
 expenses = []
 
-def calculate_total():
-    total = 0
-    for exp in expenses:
-        total += exp["amount"]
-    print(f"\nTotal Spent: Rs.{total}")
 
-def category_summary():
-    print("\n--- Category Summary ---")
-    for cat in CATEGORIES:
-        cat_total = 0
-        for exp in expenses:
-            if exp["category"] == cat:
-                cat_total += exp["amount"]
-        print(f"{cat}: Rs.{cat_total}")
-
-
-
-def monthly_summary():
-    month = get_valid_month()
-    month_total = 0
-    count = 0
-    for exp in expenses:
-        if exp["date"][3:] == month:
-            month_total += exp["amount"]
-            count += 1
-
-    if count == 0:
-        print(f"No expenses found for {month}.")
-        return
-
-    print(f"\n--- Summary for {month} ---")
-    print(f"Number of expenses: {count}")
-    print(f"Total spent: Rs.{month_total:.2f}")
-    print("By category:")
-    for cat in CATEGORIES:
-        cat_total = 0
-        for exp in expenses:
-            if exp["date"][3:] == month and exp["category"] == cat:
-                cat_total += exp["amount"]
-        if cat_total > 0:
-            print(f"  {cat}: Rs.{cat_total:.2f}")
 
 def set_budget():
     print(f"Current monthly budget: Rs.{settings['budget']:.2f}")
@@ -77,17 +39,6 @@ def budget_status():
         print(f"Remaining: Rs.{remaining:.2f}")
     else:
         print(f"WARNING: Over budget by Rs.{-remaining:.2f}")
-def highest_expense():
-    if len(expenses) == 0:
-        print("No expenses yet.")
-        return
-        
-    highest = expenses[0]
-    for exp in expenses:
-        if exp["amount"] > highest["amount"]:
-            highest = exp
-            
-    print(f"\nHighest Expense: {highest['description']} (Rs.{highest['amount']})")
 
 def main():
     load_expenses(expenses)
@@ -113,17 +64,17 @@ def main():
         elif choice == "2":
             view_expenses(expenses)
         elif choice == "3":
-            calculate_total()
+            calculate_total(expenses)
         elif choice == "4":
-            category_summary()
+            category_summary(expenses)
         elif choice == "5":
-            highest_expense()
+            highest_expense(expenses)
         elif choice == "6":
             delete_expense(expenses)
         elif choice == "7":
             edit_expense(expenses)
         elif choice == "8":
-            monthly_summary()
+            monthly_summary(expenses)
         elif choice == "9":
             set_budget()
         elif choice == "10":
